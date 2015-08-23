@@ -1,10 +1,19 @@
 #!/bin/sh
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd -P`
+popd > /dev/null
 
-cd webpack
+WEBPACK_DIR=$SCRIPTPATH/webpack
+METEOR_DIR=$SCRIPTPATH/meteor_core
+
+rm -rvf $METEOR_DIR/server/*
+rm -rvf $METEOR_DIR/client/*
+
+cd $WEBPACK_DIR
 env NODE_ENV=production webpack --config webpack.config.client.prod.js --progress --colors
 env NODE_ENV=production webpack --config webpack.config.server.prod.js --progress --colors
-cd ../meteor_core
-[ ! -d .prod ] || mv .prod prod
-[ ! -d dev   ] || mv dev .dev
+cd $METEOR_DIR
+ln -s $WEBPACK_DIR/$SERVER_BUNDLE server/server.bundle.js
+ln -s $WEBPACK_DIR/$CLIENT_BUNDLE client/client.bundle.js
 rm -rvf ../dist
 METEOR_SETTINGS=$(cat ../settings/prod.json) && meteor build ../dist
